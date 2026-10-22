@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -14,6 +15,9 @@ interface SpreadLayoutProps {
   className?: string;
 }
 
+const BOARD_W = 896; // design width of the spread board (max-w-4xl)
+const BOARD_H = 672; // 4:3
+
 const SpreadLayout = ({
   spread,
   cards,
@@ -23,6 +27,22 @@ const SpreadLayout = ({
   selectedCardIndex = null,
   className,
 }: SpreadLayoutProps) => {
+  const boardWrapRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  // Scale the fixed-size board down to fit narrow viewports (mobile),
+  // instead of letting card positions overflow and get clipped.
+  useEffect(() => {
+    const el = boardWrapRef.current;
+    if (!el) return;
+    const update = () =>
+      setScale(Math.min(1, el.clientWidth / BOARD_W));
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   const handleCardClick = (index: number) => {
     // First reveal the card
     onCardClick?.(index);
@@ -45,8 +65,20 @@ const SpreadLayout = ({
         </p>
       </div>
 
-      {/* Spread Layout */}
-      <div className="relative aspect-[4/3] min-h-[600px] bg-cosmic-900/35 rounded-2xl border border-gold-200/40">
+      {/* Spread Layout — fixed design size, scaled to fit viewport */}
+      <div
+        ref={boardWrapRef}
+        className="relative w-full"
+        style={{ height: BOARD_H * scale }}
+      >
+        <div
+          className="absolute left-0 top-0 origin-top-left bg-cosmic-900/35 rounded-2xl border border-gold-200/40"
+          style={{
+            width: BOARD_W,
+            height: BOARD_H,
+            transform: `scale(${scale})`,
+          }}
+        >
         {spread.positions.map((position, index) => {
           const card = cards[index];
           const isRevealed = revealedCards.has(index);
@@ -95,6 +127,7 @@ const SpreadLayout = ({
             </div>
           );
         })}
+        </div>
       </div>
 
       {/* Position Legend */}
