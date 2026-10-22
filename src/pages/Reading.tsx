@@ -137,10 +137,10 @@ const Reading = () => {
   }
 
   return (
-    <div className="min-h-screen bg-mystical-gradient">
+    <div className="min-h-screen bg-mystical-gradient overflow-x-hidden">
       {/* Header */}
       <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
           <Button
             variant="ghost"
             onClick={() => navigate("/")}
@@ -150,7 +150,7 @@ const Reading = () => {
             Back to Home
           </Button>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             <Button
               onClick={revealAllCards}
               variant="outline"
